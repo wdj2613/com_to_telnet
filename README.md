@@ -315,6 +315,13 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+发版页：<https://github.com/wdj2613/com_to_telnet/releases> —— 附件刻意用纯 ASCII 命名
+（`COM-Telnet-Gateway.exe`、`com-telnet-cli.exe`、`COM-Telnet-Gateway-onedir.zip`、
+`com-telnet-cli-onedir.zip`、`readme-zh.txt`），因为 **GitHub 会改写甚至丢弃非 ASCII 的附件名**
+（实测 `COM-Telnet网关.exe` 被改成 `COM-Telnet.exe`、`说明.txt` 直接消失）。
+重新打同一个标签（`git tag -f v1.0.0 && git push -f origin v1.0.0`）时，
+工作流会先用 `GITHUB_TOKEN` 删掉该标签下的旧 Release 再重建，避免页面上留垃圾附件。
+
 想手动触发：GitHub 仓库页面 → **Actions** → 左侧「构建 Windows exe」→ **Run workflow**。
 下载路径：Actions → 某次运行 → 页面底部 **Artifacts** → `COM-Telnet-gateway-win-x64`。
 
