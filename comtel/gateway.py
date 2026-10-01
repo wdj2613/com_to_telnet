@@ -1,9 +1,12 @@
-"""网关：把串口链路与 Telnet 服务端粘合起来。
+"""网关：把串口链路与 Telnet 服务端粘合起来（一个网关 = 一个通道）。
 
 数据流：
 
     串口 --> SerialLink --> Gateway._on_serial_data --> 广播给所有客户端
     客户端 --> TelnetServer --> Gateway.on_client_data --> 换行转换 --> 串口
+
+多通道时每个通道各有一个 :class:`Gateway` 实例（见 :mod:`comtel.manager`），
+``channel_id`` 会随每个事件一起发出去，界面/命令行据此区分是哪个通道的数据。
 """
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ import threading
 import time
 from typing import Callable, Dict, List, Optional
 
-from .config import BridgeConfig
+from .config import ChannelConfig
 from .serial_link import SerialLink
 from .telnet_server import ClientSession, TelnetServer
 
@@ -75,10 +78,12 @@ def normalize_rx(data: bytes) -> bytes:
 
 
 class Gateway:
-    """串口 <-> Telnet 的运行实例。"""
+    """串口 <-> Telnet 的运行实例（一个通道）。"""
 
-    def __init__(self, cfg: BridgeConfig, emit: Optional[Callable[..., None]] = None) -> None:
+    def __init__(self, cfg: ChannelConfig, emit: Optional[Callable[..., None]] = None,
+                 channel_id: int = 0) -> None:
         self.cfg = cfg
+        self.channel_id = channel_id
         self._emit_cb = emit or (lambda event, **payload: None)
 
         self._lock = threading.RLock()
@@ -107,6 +112,10 @@ class Gateway:
     @property
     def started_at(self) -> float:
         return self._started_at
+
+    @property
+    def name(self) -> str:
+        return self.cfg.name or "通道"
 
     def start(self) -> None:
         if self._running:
@@ -329,6 +338,7 @@ class Gateway:
     # 事件 / 日志
     # ------------------------------------------------------------------
     def _emit(self, event: str, **payload) -> None:
+        payload.setdefault("channel", self.channel_id)
         try:
             self._emit_cb(event, **payload)
         except Exception:

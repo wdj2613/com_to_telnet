@@ -3,9 +3,11 @@
 """COM 串口 <-> Telnet 网关（入口）。
 
 用法：
-    python com_telnet_bridge.py                  # 图形界面
-    python com_telnet_bridge.py -n -p COM3       # 命令行模式
-    python com_telnet_bridge.py --list-ports     # 列出串口
+    python com_telnet_bridge.py                              # 图形界面（多通道）
+    python com_telnet_bridge.py -n -p COM3 -t 2323           # 命令行模式
+    python com_telnet_bridge.py -n -p COM3 -t 2323 -p COM5 -t 2324
+    python com_telnet_bridge.py -n --map COM3=2323 --map COM5=2324
+    python com_telnet_bridge.py --list-ports                 # 列出串口
 """
 
 from __future__ import annotations

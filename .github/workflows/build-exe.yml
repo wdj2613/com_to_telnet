@@ -48,11 +48,11 @@ jobs:
           .\.venv\Scripts\python.exe -m pip install "pyinstaller==$env:PYINSTALLER_VERSION"
           .\.venv\Scripts\python.exe -m PyInstaller --version
 
-      - name: 功能自测（39 项，用 loop:// 回环，不需要真实串口）
+      - name: 功能自测（92 项，用 loop:// 回环，不需要真实串口）
         shell: pwsh
         run: .\.venv\Scripts\python.exe tests\selftest.py
 
-      - name: 界面冒烟测试（56 项，需要桌面会话，失败不阻断打包）
+      - name: 界面冒烟测试（99 项，需要桌面会话，失败不阻断打包）
         shell: pwsh
         continue-on-error: true
         run: .\.venv\Scripts\python.exe tests\gui_smoke.py

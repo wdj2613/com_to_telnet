@@ -11,7 +11,7 @@ import threading
 import time
 from typing import Callable, Optional
 
-from .config import BridgeConfig
+from .config import ChannelConfig
 from .serial_backend import (  # noqa: F401  (对外再导出，方便界面层使用)
     SerialBase,
     SerialException,
@@ -27,7 +27,7 @@ class SerialLink:
 
     def __init__(
         self,
-        cfg: BridgeConfig,
+        cfg: ChannelConfig,
         on_data: Callable[[bytes], None],
         on_error: Callable[[str], None],
         on_state: Optional[Callable[[bool, str], None]] = None,

@@ -49,13 +49,29 @@ function Get-BridgeProcess {
 function Start-Bridge {
     param([double]$Zoom, [int]$WinW, [int]$WinH)
     $cfg = Join-Path $Root "config.json"
+    $channels = @(
+        [ordered]@{
+            name = "机柜A"; port = "COM3"; baudrate = 115200; listen_host = "0.0.0.0"
+            listen_port = 2323; banner = "欢迎使用 COM-Telnet 网关"; log_file = "logs/机柜A.log"
+        },
+        [ordered]@{
+            name = "机柜B"; port = "COM5"; baudrate = 9600; listen_host = "0.0.0.0"
+            listen_port = 2324; banner = "机柜B 控制台"; log_file = "logs/机柜B.log"
+        },
+        [ordered]@{
+            name = "调试口"; port = "loop://"; baudrate = 115200; listen_host = "127.0.0.1"
+            listen_port = 2325; banner = "调试回环"; log_file = "logs/调试口.log"
+        }
+    )
     $json = [ordered]@{
-        port = ""; baudrate = 115200; listen_port = 2323; listen_host = "0.0.0.0"
-        banner = "欢迎使用 COM-Telnet 网关"
+        version = 2
         ui_scale = $Zoom
         window_geometry = "$WinW`x$WinH"
-        timestamps = $true; show_rx = $true; show_tx = $true
-    } | ConvertTo-Json
+        selected_channel = 0
+        timestamps = $true
+        autoscroll = $true
+        channels = $channels
+    } | ConvertTo-Json -Depth 5
     [System.IO.File]::WriteAllText($cfg, $json, (New-Object System.Text.UTF8Encoding($false)))
     $py = Join-Path $Root ".venv\Scripts\pythonw.exe"
     $proc = Start-Process -FilePath $py -ArgumentList "`"$(Join-Path $Root 'com_telnet_bridge.py')`"" `
