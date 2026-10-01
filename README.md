@@ -315,6 +315,12 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+> 推代码 / 发 PR **不会**发版，只会打包并上传 Artifact；只有推 `v*` 标签才会建 Release。
+>
+> 建出来的是 **草稿（draft）**：只有仓库成员在 Releases 页面能看到，带 `Draft` 标记。
+> 检查无误后点开该草稿右上角的 **Publish release** 才正式对外发布。
+> 想改回"构建完就直接公开发布"，把工作流里 `draft: true` 删掉（或改成 `false`）即可。
+
 发版页：<https://github.com/wdj2613/com_to_telnet/releases> —— 附件刻意用纯 ASCII 命名
 （`COM-Telnet-Gateway.exe`、`com-telnet-cli.exe`、`COM-Telnet-Gateway-onedir.zip`、
 `com-telnet-cli-onedir.zip`、`readme-zh.txt`），因为 **GitHub 会改写甚至丢弃非 ASCII 的附件名**

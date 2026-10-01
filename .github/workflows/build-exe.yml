@@ -120,12 +120,16 @@ jobs:
           Invoke-RestMethod -Uri "$api/releases/$($rel.id)" -Headers $headers -Method Delete | Out-Null
           Write-Host "已删除，接下来重建"
 
-      - name: 打 tag 时发布 Release
+      # 触发条件保持"推 v* 标签才发版"不变；
+      # draft: true 表示先建成草稿（只有仓库成员能看到），
+      # 到 Releases 页面点 “Publish release” 之后才对所有人可见。
+      - name: 打 tag 时发布 Release（草稿，需手动点发布）
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           name: COM 串口转 Telnet 网关 ${{ github.ref_name }}
           fail_on_unmatched_files: true
+          draft: true
           body: |
             Windows x64 免安装版，解压/双击即用，不需要装 Python，也不需要装 .NET。
 
