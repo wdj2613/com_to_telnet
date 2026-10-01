@@ -15,6 +15,11 @@ on:
 permissions:
   contents: write
 
+# 同一个分支连着推多次时，取消上一次还在跑的构建，省 Actions 额度
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: PyInstaller 打包（Windows x64 / Python 3.9）
