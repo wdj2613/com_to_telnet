@@ -1,0 +1,2 @@
+# 本程序只依赖 Python 标准库，无需安装任何第三方包。
+# （保留该文件是为了兼容 `pip install -r requirements.txt` 的常规流程。）

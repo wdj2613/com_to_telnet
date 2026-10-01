@@ -1,0 +1,28 @@
+# exe 的版本资源（右键属性 -> 详细信息里显示的内容）
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 0, 0, 0),
+    prodvers=(1, 0, 0, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable('080404B0', [
+        StringStruct('CompanyName', 'com_to_ssh'),
+        StringStruct('FileDescription', 'COM 串口转 Telnet 网关'),
+        StringStruct('FileVersion', '1.0.0.0'),
+        StringStruct('InternalName', 'com_telnet_bridge'),
+        StringStruct('LegalCopyright', 'Python 标准库实现，无第三方依赖'),
+        StringStruct('OriginalFilename', 'com_telnet_bridge.py'),
+        StringStruct('ProductName', 'COM-Telnet 网关'),
+        StringStruct('ProductVersion', '1.0.0.0')
+      ])
+    ]),
+    VarFileInfo([VarStruct('Translation', [2052, 1200])])
+  ]
+)

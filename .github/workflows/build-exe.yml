@@ -1,0 +1,89 @@
+name: 构建 Windows exe
+
+# 什么时候跑：
+#   - 推送到 main / 向 main 发 PR：验证代码能跑通并产出 exe
+#   - 推 v* 标签（例如 v1.0.0）：额外自动创建 Release，把 exe 挂上去
+#   - 也可以在 Actions 页面手动点 “Run workflow”
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: PyInstaller 打包（Windows x64 / Python 3.9）
+    runs-on: windows-latest
+
+    env:
+      # 与本机验证过的版本保持一致，避免 CI 因为 PyInstaller 升级而突然失败
+      PYINSTALLER_VERSION: '6.22.3'
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      # 项目要求所有运行都在虚拟环境里，这里也照做：
+      # build_exe.ps1 / run.bat 都会直接使用 .venv
+      - name: 创建虚拟环境并安装 PyInstaller
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install "pyinstaller==$env:PYINSTALLER_VERSION"
+          .\.venv\Scripts\python.exe -m PyInstaller --version
+
+      - name: 功能自测（39 项，用 loop:// 回环，不需要真实串口）
+        shell: pwsh
+        run: .\.venv\Scripts\python.exe tests\selftest.py
+
+      - name: 界面冒烟测试（56 项，需要桌面会话，失败不阻断打包）
+        shell: pwsh
+        continue-on-error: true
+        run: .\.venv\Scripts\python.exe tests\gui_smoke.py
+
+      - name: 生成图标并打包（单文件版 + 免解包绿色版，共 4 个产物）
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1
+
+      - name: 冒烟验证 exe 真的能启动
+        shell: pwsh
+        run: |
+          .\dist\com-telnet-cli.exe --version
+          .\dist\com-telnet-cli.exe --list-ports
+          # 机器上没有串口时 --list-ports 按设计返回 1，不算失败
+          if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 1) {
+            throw "exe 异常退出，退出码 $LASTEXITCODE"
+          }
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: COM-Telnet-gateway-win-x64
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            dist/COM-Telnet网关.exe
+            dist/com-telnet-cli.exe
+            dist/说明.txt
+            dist/onedir/**
+
+      - name: 打 tag 时发布 Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/COM-Telnet网关.exe
+            dist/com-telnet-cli.exe
+            dist/说明.txt
+          generate_release_notes: true
