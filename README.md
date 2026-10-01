@@ -135,7 +135,8 @@ com_to_ssh/
 │  └─ console.py             # 控制台 UTF-8 处理
 ├─ tools/
 │  ├─ telnet_probe.py        # 自带的 Telnet 测试客户端
-│  └─ capture_ui.ps1         # 按不同尺寸给界面截图（核对缩放效果）
+│  ├─ capture_ui.ps1         # 按不同尺寸给界面截图（核对缩放效果）
+│  └─ check_ci.py            # 查询 GitHub Actions 最近一次运行状态与产物
 └─ tests/
    ├─ selftest.py            # 功能自测（无需真实串口）
    └─ gui_smoke.py           # 界面冒烟 + 缩放/重排测试
@@ -316,6 +317,14 @@ git push origin v1.0.0
 
 想手动触发：GitHub 仓库页面 → **Actions** → 左侧「构建 Windows exe」→ **Run workflow**。
 下载路径：Actions → 某次运行 → 页面底部 **Artifacts** → `COM-Telnet-gateway-win-x64`。
+
+在命令行里查看最近一次运行的结果和产物：
+
+```powershell
+.\.venv\Scripts\python.exe tools\check_ci.py            # 公开仓库免登录
+.\.venv\Scripts\python.exe tools\check_ci.py --all      # 最近 10 次
+set GITHUB_TOKEN=xxx && .\.venv\Scripts\python.exe tools\check_ci.py   # 私有仓库需要 token
+```
 
 > CI 里从 PyPI 安装 PyInstaller；本机离线时则用仓库里 `vendor/` 已存好的 wheel（`build_exe.ps1` 会自动判断）。
 > 如果你的仓库默认分支不是 `main`，把徽章和工作流里的分支名改一下即可。
