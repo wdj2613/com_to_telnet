@@ -364,14 +364,16 @@ python -m venv .venv
 
 ## 10. 编译成 exe
 
-成品已经放在 `dist/`，**目标机器不需要安装 Python**（exe 内置了 Python 3.9 运行时，64 位）。
+默认只打**一个双击即用的图形界面 exe**：`dist\COM_To_Telnet.exe`（外加同目录的 `说明.txt`）。
+需要命令行版和免解包绿色版时用 `build_exe.bat -All`，会额外产出下面表格里带「需 `-All`」的三项。
+**目标机器不需要安装 Python**（exe 内置了 Python 3.9 运行时，64 位）。
 
 | 产物 | 大小 | 特点 |
 | --- | --- | --- |
-| `dist\COM-Telnet网关.exe` | 8.4 MB | 单文件图形界面，拷贝一个文件就能用；启动时先把运行时解包到临时目录（首次约 2–4 秒） |
-| `dist\com-telnet-cli.exe` | 5.6 MB | 单文件命令行版，适合做服务/随系统启动 |
-| `dist\onedir\COM-Telnet网关\` | 19.0 MB（整个文件夹） | 免解包**绿色版**：启动快，不受临时目录/杀软限制影响 |
-| `dist\onedir\com-telnet-cli\` | 11.8 MB（整个文件夹） | 免解包命令行版 |
+| `dist\COM_To_Telnet.exe` | 8.4 MB | **双击即用**的单文件图形界面（默认只打这一个）；启动时先把运行时解包到临时目录（首次约 2–4 秒） |
+| `dist\com-telnet-cli.exe` | 5.6 MB | 单文件命令行版，适合做服务/随系统启动（需 `-All`） |
+| `dist\onedir\COM_To_Telnet\` | 19.0 MB（整个文件夹） | 免解包**绿色版**：启动快，不受临时目录/杀软限制影响（需 `-All`） |
+| `dist\onedir\com-telnet-cli\` | 11.8 MB（整个文件夹） | 免解包命令行版（需 `-All`） |
 
 两个版本功能完全一致，按环境挑一个即可：
 
@@ -381,7 +383,7 @@ python -m venv .venv
 使用：
 
 ```
-dist\COM-Telnet网关.exe                                     # 双击，图形界面
+dist\COM_To_Telnet.exe                                      # 双击，图形界面（多通道）
 dist\com-telnet-cli.exe -p COM3 -b 115200 -t 2323           # 命令行（单通道）
 dist\com-telnet-cli.exe -p COM3 -t 2323 -p COM5 -t 2324     # 命令行（多通道）
 dist\com-telnet-cli.exe --map COM3=2323 --map COM5=2324     # 同上，另一种写法
@@ -393,11 +395,12 @@ dist\com-telnet-cli.exe --list-ports                        # 列出本机串口
 ### 重新编译
 
 ```powershell
-build_exe.bat
+build_exe.bat            # 只打图形界面单文件版：dist\COM_To_Telnet.exe + 说明.txt
+build_exe.bat -All       # 再加上命令行版与两个免解包绿色版（发版用）
 ```
 
-脚本会：确保 `.venv` 存在 → 离线安装 PyInstaller（用 `vendor/` 里已下载的 wheel）→ 生成图标 → 依次打包 4 个产物。
-也可以直接右键运行 `build_exe.ps1`（可加 `-SkipIcon` 跳过图标生成）。
+脚本会：确保 `.venv` 存在 → 离线安装 PyInstaller（用 `vendor/` 里已下载的 wheel）→ 生成图标 → 打包。
+也可以直接右键运行 `build_exe.ps1`（可加 `-All`、`-SkipIcon`）。
 
 打包相关文件：
 
@@ -417,7 +420,7 @@ Windows 机器上自动跑：
 1. 装 Python 3.9 → 建 `.venv` → 装 PyInstaller（版本固定在 `PYINSTALLER_VERSION`）
 2. 跑功能自测 92 项（`tests/selftest.py`，用 `loop://`，不需要串口）
 3. 跑界面冒烟测试 99 项（需要桌面会话，失败不阻断打包）
-4. 自动生成图标并打包出 4 个产物，还会运行 `com-telnet-cli.exe --version` 确认 exe 真能启动
+4. 自动生成图标并打包出 4 个产物（`build_exe.ps1 -All`），还会运行 `com-telnet-cli.exe --version` 确认 exe 真能启动
 5. 把产物上传成 Artifact（Actions 页面每次运行都能下载）
 
 **打标签发版**：推一个 `v*` 标签（例如 `v1.0.0`）就会自动创建 Release 并附上 exe：
@@ -434,7 +437,7 @@ git push origin v1.0.0
 > 想改回"构建完就直接公开发布"，把工作流里 `draft: true` 删掉（或改成 `false`）即可。
 
 发版页：<https://github.com/wdj2613/com_to_telnet/releases> —— 附件刻意用纯 ASCII 命名
-（`COM-Telnet-Gateway.exe`、`com-telnet-cli.exe`、`COM-Telnet-Gateway-onedir.zip`、
+（`COM_To_Telnet.exe`、`com-telnet-cli.exe`、`COM_To_Telnet-onedir.zip`、
 `com-telnet-cli-onedir.zip`、`readme-zh.txt`），因为 **GitHub 会改写甚至丢弃非 ASCII 的附件名**
 （实测 `COM-Telnet网关.exe` 被改成 `COM-Telnet.exe`、`说明.txt` 直接消失）。
 重新打同一个标签（`git tag -f v1.0.0 && git push -f origin v1.0.0`）时，

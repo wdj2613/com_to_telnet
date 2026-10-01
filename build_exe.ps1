@@ -1,15 +1,20 @@
 ﻿# COM-Telnet 网关：一键打包 exe（全程使用 .venv 虚拟环境）
 #
-# 产物：
-#   dist\COM-Telnet网关.exe                     单文件 GUI（拷贝即用，启动时解包到临时目录）
-#   dist\com-telnet-cli.exe                     单文件命令行
-#   dist\onedir\COM-Telnet网关\COM-Telnet网关.exe   免解包绿色版 GUI（启动更快，受限环境/杀软更友好）
+# 默认只打图形界面单文件版，双击就能用：
+#   dist\COM_To_Telnet.exe
+#
+# 加 -All 会把另外三个产物也打出来（发版/命令行用户需要）：
+#   dist\com-telnet-cli.exe                         单文件命令行
+#   dist\onedir\COM_To_Telnet\COM_To_Telnet.exe     免解包绿色版 GUI（启动更快，受限环境/杀软更友好）
 #   dist\onedir\com-telnet-cli\com-telnet-cli.exe   免解包绿色版命令行
 #
-# 用法：右键“使用 PowerShell 运行”，或  build_exe.bat
+# 用法：右键“使用 PowerShell 运行”，或  build_exe.bat   /   build_exe.bat -All
 
 [CmdletBinding()]
-param([switch]$SkipIcon)
+param(
+    [switch]$SkipIcon,
+    [switch]$All
+)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -63,20 +68,34 @@ $dist = Join-Path $Root 'dist'
 $distOne = Join-Path $Root 'dist\onedir'
 
 # 先清掉旧产物；如果 exe 还在运行会删不掉，直接给出能看懂的提示
-foreach ($f in @((Join-Path $dist 'COM-Telnet网关.exe'), (Join-Path $dist 'com-telnet-cli.exe'))) {
+$oldFiles = @(
+    (Join-Path $dist 'COM_To_Telnet.exe'),
+    (Join-Path $dist 'COM-Telnet网关.exe'),        # 旧名字，顺手清掉
+    (Join-Path $dist 'com-telnet-cli.exe')
+)
+if ($All) {
+    $oldFiles += @(
+        (Join-Path $distOne 'COM_To_Telnet'),
+        (Join-Path $distOne 'COM-Telnet网关'),      # 旧名字
+        (Join-Path $distOne 'com-telnet-cli')
+    )
+}
+foreach ($f in $oldFiles) {
     if (Test-Path $f) {
         try {
-            Remove-Item $f -Force -ErrorAction Stop
+            Remove-Item $f -Recurse -Force -ErrorAction Stop
         } catch {
             throw "无法覆盖 $f —— 请先关闭正在运行的 exe（任务管理器里结束同名进程）后重试"
         }
     }
 }
 
-Invoke-Build -Name 'COM-Telnet网关' -Entry 'packaging\exe_gui.py' -Mode onefile -Window windowed -Dist $dist   -Work (Join-Path $Root 'build\onefile-gui')
-Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onefile -Window console  -Dist $dist   -Work (Join-Path $Root 'build\onefile-cli')
-Invoke-Build -Name 'COM-Telnet网关' -Entry 'packaging\exe_gui.py' -Mode onedir  -Window windowed -Dist $distOne -Work (Join-Path $Root 'build\onedir-gui')
-Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onedir  -Window console  -Dist $distOne -Work (Join-Path $Root 'build\onedir-cli')
+Invoke-Build -Name 'COM_To_Telnet' -Entry 'packaging\exe_gui.py' -Mode onefile -Window windowed -Dist $dist -Work (Join-Path $Root 'build\onefile-gui')
+if ($All) {
+    Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onefile -Window console  -Dist $dist    -Work (Join-Path $Root 'build\onefile-cli')
+    Invoke-Build -Name 'COM_To_Telnet'  -Entry 'packaging\exe_gui.py' -Mode onedir  -Window windowed -Dist $distOne -Work (Join-Path $Root 'build\onedir-gui')
+    Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onedir  -Window console  -Dist $distOne -Work (Join-Path $Root 'build\onedir-cli')
+}
 
 # 中文说明随产物一起发出去（内容放在 packaging\readme-release.txt，脚本里不塞长文本）
 Copy-Item (Join-Path $Root 'packaging\readme-release.txt') (Join-Path $dist '说明.txt') -Force
@@ -84,9 +103,12 @@ Copy-Item (Join-Path $Root 'packaging\readme-release.txt') (Join-Path $dist '说
 Write-Host ''
 Write-Host '打包完成，产物如下：' -ForegroundColor Green
 Get-ChildItem $dist -File | ForEach-Object { Write-Host ('  {0,-24} {1,7:N2} MB' -f $_.Name, ($_.Length / 1MB)) }
-Get-ChildItem $distOne -Directory | ForEach-Object {
-    $sum = (Get-ChildItem $_.FullName -Recurse -File | Measure-Object -Property Length -Sum).Sum
-    Write-Host ('  {0,-24} {1,7:N2} MB  （整个文件夹一起拷贝）' -f $_.Name, ($sum / 1MB))
+if ($All) {
+    Get-ChildItem $distOne -Directory | ForEach-Object {
+        $sum = (Get-ChildItem $_.FullName -Recurse -File | Measure-Object -Property Length -Sum).Sum
+        Write-Host ('  {0,-24} {1,7:N2} MB  （整个文件夹一起拷贝）' -f $_.Name, ($sum / 1MB))
+    }
 }
 Write-Host ''
-Write-Host '直接双击 dist\COM-Telnet网关.exe 即可使用。'
+Write-Host '直接双击 dist\COM_To_Telnet.exe 即可使用。'
+if (-not $All) { Write-Host '（需要命令行版 / 绿色版时加 -All 重新打包：build_exe.bat -All）' }

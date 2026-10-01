@@ -57,9 +57,9 @@ jobs:
         continue-on-error: true
         run: .\.venv\Scripts\python.exe tests\gui_smoke.py
 
-      - name: 生成图标并打包（单文件版 + 免解包绿色版，共 4 个产物）
+      - name: 生成图标并打包（-All：单文件版 + 免解包绿色版，共 4 个产物）
         shell: pwsh
-        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\build_exe.ps1 -All
 
       - name: 冒烟验证 exe 真的能启动
         shell: pwsh
@@ -77,14 +77,14 @@ jobs:
           $out = 'dist\release'
           Remove-Item $out -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force $out | Out-Null
-          Copy-Item 'dist\COM-Telnet网关.exe' "$out\COM-Telnet-Gateway.exe"
+          Copy-Item 'dist\COM_To_Telnet.exe'  "$out\COM_To_Telnet.exe"
           Copy-Item 'dist\com-telnet-cli.exe' "$out\com-telnet-cli.exe"
           Copy-Item 'dist\说明.txt'           "$out\readme-zh.txt"
-          Compress-Archive -Path 'dist\onedir\COM-Telnet网关\*' -DestinationPath "$out\COM-Telnet-Gateway-onedir.zip" -Force
+          Compress-Archive -Path 'dist\onedir\COM_To_Telnet\*' -DestinationPath "$out\COM_To_Telnet-onedir.zip" -Force
           Compress-Archive -Path 'dist\onedir\com-telnet-cli\*' -DestinationPath "$out\com-telnet-cli-onedir.zip" -Force
           Get-ChildItem $out | Format-Table Name, @{n='MB';e={[math]::Round($_.Length/1MB,2)}}
-          foreach ($f in 'COM-Telnet-Gateway.exe','com-telnet-cli.exe','readme-zh.txt',
-                         'COM-Telnet-Gateway-onedir.zip','com-telnet-cli-onedir.zip') {
+          foreach ($f in 'COM_To_Telnet.exe','com-telnet-cli.exe','readme-zh.txt',
+                         'COM_To_Telnet-onedir.zip','com-telnet-cli-onedir.zip') {
             if (-not (Test-Path "$out\$f")) { throw "发布文件缺失：$f" }
           }
 
@@ -135,20 +135,21 @@ jobs:
 
             | 附件 | 说明 |
             | --- | --- |
-            | `COM-Telnet-Gateway.exe` | **图形界面**，单文件版，双击运行（首次启动自解压约 1~2 秒） |
-            | `com-telnet-cli.exe` | **命令行版**，例如 `com-telnet-cli.exe -p COM3 -b 115200` |
-            | `COM-Telnet-Gateway-onedir.zip` | 图形界面，免解包绿色版（杀软拦自解压、或想放到 U 盘时用这个） |
+            | `COM_To_Telnet.exe` | **图形界面**，单文件版，双击运行（首次启动自解压约 1~2 秒） |
+            | `com-telnet-cli.exe` | **命令行版**，例如 `com-telnet-cli.exe -p COM3 -b 115200 -t 2323` |
+            | `COM_To_Telnet-onedir.zip` | 图形界面，免解包绿色版（杀软拦自解压、或想放到 U 盘时用这个） |
             | `com-telnet-cli-onedir.zip` | 命令行，免解包绿色版 |
             | `readme-zh.txt` | 防火墙放行、使用注意事项 |
 
-            用法：双击 `COM-Telnet-Gateway.exe` → 选串口（插上 USB 转串口线后点“刷新”）→ 点“启动” →
+            用法：双击 `COM_To_Telnet.exe` → 选串口（插上 USB 转串口线后点“刷新”）→ 点“启动” →
             别的机器 `telnet <这台机器的IP> 2323` 就能连上看串口数据，多个客户端可以同时连。
+            需要多个串口同时转发时，点左侧“＋ 新建”加通道，端口会自动分配 2323、2324…
 
             第一次运行如果 Windows 防火墙弹窗，请勾选“专用网络”并允许，否则局域网内其他机器连不上 2323 端口。
             详细用法见仓库 [README](https://github.com/wdj2613/com_to_telnet#readme)。
           files: |
-            dist/release/COM-Telnet-Gateway.exe
+            dist/release/COM_To_Telnet.exe
             dist/release/com-telnet-cli.exe
-            dist/release/COM-Telnet-Gateway-onedir.zip
+            dist/release/COM_To_Telnet-onedir.zip
             dist/release/com-telnet-cli-onedir.zip
             dist/release/readme-zh.txt

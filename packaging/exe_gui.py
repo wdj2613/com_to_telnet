@@ -1,6 +1,6 @@
 """PyInstaller 入口：图形界面版（打包成无控制台窗口的 exe）。
 
-用法（打包后）：双击 exe，或 ``COM-Telnet网关.exe -c D:\\my\\config.json``
+用法（打包后）：双击 exe，或 ``COM_To_Telnet.exe -c D:\\my\\config.json``
 """
 
 from __future__ import annotations

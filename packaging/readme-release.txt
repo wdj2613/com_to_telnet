@@ -1,11 +1,11 @@
 # COM-Telnet 网关：把 COM 串口发布成 Telnet（多串口 / 多客户端广播）
 #
-#   COM-Telnet网关.exe        图形界面版，双击即用
+#   COM_To_Telnet.exe        图形界面版，双击即用
 #   com-telnet-cli.exe        命令行版（在 cmd/PowerShell 里运行）
 #   onedir\                    免解包“绿色版”：整个文件夹一起拷贝，启动更快
 #
 # 快速开始
-#   1) 双击 COM-Telnet网关.exe
+#   1) 双击 COM_To_Telnet.exe
 #   2) 插上 USB 转串口线，点“刷新”，选 COMx 与波特率
 #   3) 点“▶ 启动”，客户端连 本机IP:2323
 #      - PuTTY：Connection type 选 Telnet，端口 2323
