@@ -78,6 +78,9 @@ Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onefile 
 Invoke-Build -Name 'COM-Telnet网关' -Entry 'packaging\exe_gui.py' -Mode onedir  -Window windowed -Dist $distOne -Work (Join-Path $Root 'build\onedir-gui')
 Invoke-Build -Name 'com-telnet-cli' -Entry 'packaging\exe_cli.py' -Mode onedir  -Window console  -Dist $distOne -Work (Join-Path $Root 'build\onedir-cli')
 
+# 中文说明随产物一起发出去（内容放在 packaging\readme-release.txt，脚本里不塞长文本）
+Copy-Item (Join-Path $Root 'packaging\readme-release.txt') (Join-Path $dist '说明.txt') -Force
+
 Write-Host ''
 Write-Host '打包完成，产物如下：' -ForegroundColor Green
 Get-ChildItem $dist -File | ForEach-Object { Write-Host ('  {0,-24} {1,7:N2} MB' -f $_.Name, ($_.Length / 1MB)) }
